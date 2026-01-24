@@ -1,7 +1,10 @@
 package com.example.demo.topico;
 
-import com.example.demo.usuario.DetalleUsuarioDTO;
+import com.example.demo.curso.Curso;
+import com.example.demo.infra.exceptions.TopicoException;
+import com.example.demo.usuario.Usuario;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -17,16 +20,16 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class TopicoController {
 
     @Autowired
-    private AgregarTopico agregarTopico;
+    private FuncionesTopico funcionesTopico;
     @Autowired
     private TopicoRepository topicoRepositorio;
 
     @Transactional
     @PostMapping
     public ResponseEntity agregarTopico(@RequestBody @Valid DatosTopicoDTO datosTopico, UriComponentsBuilder uriComponentsBuilder){
-        var topicoAgregado = agregarTopico.agregarTopico(datosTopico, uriComponentsBuilder);
+        var topicoAgregado = funcionesTopico.agregarTopico(datosTopico, uriComponentsBuilder);
 
-        return ResponseEntity.created(topicoAgregado).body(new DetalleTopicoDTO(datosTopico.titulo(), datosTopico.mensaje()));
+        return ResponseEntity.created(topicoAgregado).body(new TopicoCreadoDTO(datosTopico.titulo(), datosTopico.mensaje()));
     }
 
     @GetMapping
@@ -37,5 +40,18 @@ public class TopicoController {
     @GetMapping("/recientes")
     public ResponseEntity mostrarTopicosRecientes(){
         return ResponseEntity.ok(topicoRepositorio.findTop10OrderByFechaDeCreacion().stream().map(t -> new DatosTopicoDTO(t.getTitulo(), t.getMensaje(), t.getEstado(), t.getUsuario().getId(), t.getCurso().getId())));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity mostrarTopicoEspecificoConId(@PathVariable Long id){
+        var topicoEncontrado = funcionesTopico.mostrarTopicoPorId(id);
+        return ResponseEntity.ok().body(topicoEncontrado);
+    }
+
+    @Transactional
+    @PutMapping
+    public ResponseEntity actualizarTopico(@RequestBody @Valid DatosActualizarTopico datosActualizarTopico) {
+        var topicoActualizado = funcionesTopico.actualizarTopico(datosActualizarTopico);
+        return ResponseEntity.ok(topicoActualizado);
     }
 }
