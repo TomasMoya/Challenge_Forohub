@@ -1,6 +1,7 @@
 package com.example.demo.curso;
 
 import com.example.demo.usuario.DetalleUsuarioDTO;
+import com.example.demo.usuario.Usuario;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +33,14 @@ public class CursoController {
 
     @GetMapping
     public ResponseEntity mostrarCursos(@PageableDefault(size = 10) Pageable pageable){
-        return ResponseEntity.ok(cursoRepositorio.findAll(pageable).map(c -> new DatosCursoDTO(c.getCurso())));
+        return ResponseEntity.ok(cursoRepositorio.findByEstadoTrue(pageable).map(c -> new DatosCursoDTO(c.getCurso())));
+    }
+
+    @Transactional
+    @DeleteMapping("/{id}")
+    public ResponseEntity deshabilitarCurso(@PathVariable Long id){
+        Curso curso = cursoRepositorio.getReferenceById(id);
+        curso.deshabilitarUsuario();
+        return ResponseEntity.noContent().build();
     }
 }

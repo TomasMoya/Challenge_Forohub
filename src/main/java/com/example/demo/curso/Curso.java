@@ -18,9 +18,15 @@ public class Curso {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String curso;
+    private boolean estado;
 
     public Curso(@Valid DatosCursoDTO datosCurso) {
         this.id = null;
         this.curso = datosCurso.curso();
+        this.estado = true;
+    }
+
+    public void deshabilitarUsuario() {
+        this.estado = false;
     }
 }

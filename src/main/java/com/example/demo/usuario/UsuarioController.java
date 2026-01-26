@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -17,6 +19,8 @@ import java.net.URI;
 // @SecurityRequirement(name = "bearer-key")
 public class UsuarioController {
 
+    @Autowired
+    private AuthenticationManager manager;
     @Autowired
     private UsuarioRepository usuarioRepositorio;
     @Autowired
@@ -35,6 +39,22 @@ public class UsuarioController {
 
     @GetMapping
     public ResponseEntity mostrarUsuarios(@PageableDefault(size = 10) Pageable pageable){
-        return ResponseEntity.ok(usuarioRepositorio.findAll(pageable).map(u -> new DetalleUsuarioDTO(u.getNombre(), u.getEmail())));
+        return ResponseEntity.ok(usuarioRepositorio.findByEstadoTrue(pageable).map(u -> new DetalleUsuarioDTO(u.getNombre(), u.getEmail())));
+    }
+
+    @Transactional
+    @DeleteMapping("/{id}")
+    public ResponseEntity deshabilitarUsuario(@PathVariable Long id){
+        Usuario usuario = usuarioRepositorio.getReferenceById(id);
+        usuario.deshabilitarUsuario();
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity iniciarSesion(@RequestBody @Valid DatosAutenticacion datos){
+        var token = new UsernamePasswordAuthenticationToken(datos.nombre(), datos.contrasena());
+        var autenticacion = manager.authenticate(token);
+
+        return ResponseEntity.ok().build();
     }
 }
