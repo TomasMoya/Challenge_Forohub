@@ -34,7 +34,7 @@ public class TopicoController {
 
     @GetMapping
     public ResponseEntity mostrarTopicos(@PageableDefault(size = 10) Pageable pageable){
-        return ResponseEntity.ok(topicoRepositorio.findAll(pageable).map(t -> new DatosTopicoDTO(t.getTitulo(), t.getMensaje(), t.getEstado(), t.getUsuario().getId(), t.getCurso().getId())));
+        return ResponseEntity.ok(topicoRepositorio.findByEstadoNoEliminado(pageable).map(t -> new DatosTopicoDTO(t.getTitulo(), t.getMensaje(), t.getEstado(), t.getUsuario().getId(), t.getCurso().getId())));
     }
 
     @GetMapping("/recientes")
@@ -53,5 +53,13 @@ public class TopicoController {
     public ResponseEntity actualizarTopico(@RequestBody @Valid DatosActualizarTopico datosActualizarTopico) {
         var topicoActualizado = funcionesTopico.actualizarTopico(datosActualizarTopico);
         return ResponseEntity.ok(topicoActualizado);
+    }
+
+    @Transactional
+    @DeleteMapping("/{id}")
+    public ResponseEntity deshabilitarTopico(@PathVariable Long id){
+        Topico topico = topicoRepositorio.getReferenceById(id);
+        topico.deshabilitarTopico();
+        return ResponseEntity.noContent().build();
     }
 }
