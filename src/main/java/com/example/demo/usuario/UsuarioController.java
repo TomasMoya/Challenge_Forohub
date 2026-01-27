@@ -1,6 +1,8 @@
 package com.example.demo.usuario;
 
 import com.example.demo.curso.CursoRepository;
+import com.example.demo.infra.security.DatosTokenJWT;
+import com.example.demo.infra.security.TokenService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +21,8 @@ import java.net.URI;
 // @SecurityRequirement(name = "bearer-key")
 public class UsuarioController {
 
+    @Autowired
+    private TokenService tokenService;
     @Autowired
     private AuthenticationManager manager;
     @Autowired
@@ -54,7 +58,8 @@ public class UsuarioController {
     public ResponseEntity iniciarSesion(@RequestBody @Valid DatosAutenticacion datos){
         var token = new UsernamePasswordAuthenticationToken(datos.nombre(), datos.contrasena());
         var autenticacion = manager.authenticate(token);
+        var tokenDTO = new DatosTokenJWT(tokenService.generarToken((Usuario) autenticacion.getPrincipal()));
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(tokenDTO);
     }
 }
