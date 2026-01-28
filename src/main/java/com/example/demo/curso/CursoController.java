@@ -2,6 +2,7 @@ package com.example.demo.curso;
 
 import com.example.demo.usuario.DetalleUsuarioDTO;
 import com.example.demo.usuario.Usuario;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -15,7 +16,7 @@ import java.net.URI;
 
 @RestController
 @RequestMapping("/cursos")
-// @SecurityRequirement(name = "bearer-key")
+@SecurityRequirement(name = "bearer-key")
 public class CursoController {
 
     @Autowired
