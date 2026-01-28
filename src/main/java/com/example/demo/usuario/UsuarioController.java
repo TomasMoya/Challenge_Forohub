@@ -3,6 +3,7 @@ package com.example.demo.usuario;
 import com.example.demo.curso.CursoRepository;
 import com.example.demo.infra.security.DatosTokenJWT;
 import com.example.demo.infra.security.TokenService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +19,6 @@ import java.net.URI;
 
 @RestController
 @RequestMapping("/usuarios")
-// @SecurityRequirement(name = "bearer-key")
 public class UsuarioController {
 
     @Autowired
@@ -31,6 +31,7 @@ public class UsuarioController {
     private CursoRepository cursoRepositorio;
 
     @Transactional
+    @SecurityRequirement(name = "bearer-key")
     @PostMapping
     public ResponseEntity agregarUsuario(@RequestBody @Valid DatosUsuarioDTO datosUsuario, UriComponentsBuilder uriComponentsBuilder) {
         var curso = cursoRepositorio.findById(datosUsuario.curso_id()).orElseThrow(() -> new RuntimeException("Curso no encontrado"));
@@ -41,12 +42,14 @@ public class UsuarioController {
         return ResponseEntity.created(uri).body(detalleUsuario);
     }
 
+    @SecurityRequirement(name = "bearer-key")
     @GetMapping
     public ResponseEntity mostrarUsuarios(@PageableDefault(size = 10) Pageable pageable){
         return ResponseEntity.ok(usuarioRepositorio.findByEstadoTrue(pageable).map(u -> new DetalleUsuarioDTO(u.getNombre(), u.getEmail())));
     }
 
     @Transactional
+    @SecurityRequirement(name = "bearer-key")
     @DeleteMapping("/{id}")
     public ResponseEntity deshabilitarUsuario(@PathVariable Long id){
         Usuario usuario = usuarioRepositorio.getReferenceById(id);
